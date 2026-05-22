@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -283,7 +283,7 @@ def predict_match(data: MatchRequest):
         )
         return {"prediction": chat_completion.choices[0].message.content}
     except Exception as e:
-=======
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -568,5 +568,5 @@ def predict_match(data: MatchRequest):
         )
         return {"prediction": chat_completion.choices[0].message.content}
     except Exception as e:
->>>>>>> 2db2efc900a8a3c291d1ab8c991548ce2aa8c53e
+
         return {"prediction": f"Error generating prediction: {str(e)}"}
