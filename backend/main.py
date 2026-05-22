@@ -32,8 +32,13 @@ APIFOOTBALL_BASE = "https://v3.football.api-sports.io"
 FOOTBALLDATA_BASE = "https://api.football-data.org/v4"
 SPORTSDB_BASE = "https://www.thesportsdb.com/api/v1/json/3"
 
-APIFOOTBALL_HEADERS = {"x-apisports-key": FOOTBALL_API_KEY}
-FOOTBALLDATA_HEADERS = {"X-Auth-Token": FOOTBALLDATA_API_KEY}
+APIFOOTBALL_HEADERS = {
+    "x-apisports-key": FOOTBALL_API_KEY or ""
+}
+
+FOOTBALLDATA_HEADERS = {
+    "X-Auth-Token": FOOTBALLDATA_API_KEY or ""
+}
 
 
 class MatchRequest(BaseModel):
@@ -46,85 +51,101 @@ def home():
     return {"message": "KickMind AI Backend Running"}
 
 
+# ---------------- LIVE ----------------
 @app.get("/live")
 async def get_live_matches():
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{APIFOOTBALL_BASE}/fixtures",
-            headers=APIFOOTBALL_HEADERS,
-            params={"live": "all"}
-        )
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{APIFOOTBALL_BASE}/fixtures",
+                headers=APIFOOTBALL_HEADERS,
+                params={"live": "all"}
+            )
 
-    data = response.json()
+        data = response.json()
 
-    matches = []
+        if "response" not in data:
+            return {"matches": [], "error": "Invalid API response"}
 
-    for fixture in data.get("response", []):
-        matches.append({
-            "id": fixture["fixture"]["id"],
-            "status": fixture["fixture"]["status"]["long"],
-            "minute": fixture["fixture"]["status"]["elapsed"],
-            "home_team": fixture["teams"]["home"]["name"],
-            "home_logo": fixture["teams"]["home"]["logo"],
-            "away_team": fixture["teams"]["away"]["name"],
-            "away_logo": fixture["teams"]["away"]["logo"],
-            "home_score": fixture["goals"]["home"],
-            "away_score": fixture["goals"]["away"],
-            "league": fixture["league"]["name"],
-            "league_logo": fixture["league"]["logo"],
-            "country": fixture["league"]["country"],
-        })
+        matches = []
 
-    return {"matches": matches}
+        for fixture in data.get("response", []):
+            matches.append({
+                "id": fixture["fixture"]["id"],
+                "status": fixture["fixture"]["status"]["long"],
+                "minute": fixture["fixture"]["status"].get("elapsed", 0),
+                "home_team": fixture["teams"]["home"]["name"],
+                "home_logo": fixture["teams"]["home"]["logo"],
+                "away_team": fixture["teams"]["away"]["name"],
+                "away_logo": fixture["teams"]["away"]["logo"],
+                "home_score": fixture["goals"]["home"],
+                "away_score": fixture["goals"]["away"],
+                "league": fixture["league"]["name"],
+                "league_logo": fixture["league"]["logo"],
+                "country": fixture["league"]["country"],
+            })
+
+        return {"matches": matches}
+
+    except Exception as e:
+        return {"matches": [], "error": str(e)}
 
 
+# ---------------- FIXTURES ----------------
 @app.get("/fixtures/today")
 async def get_todays_fixtures():
-    today = date.today().isoformat()
+    try:
+        today = date.today().isoformat()
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{APIFOOTBALL_BASE}/fixtures",
-            headers=APIFOOTBALL_HEADERS,
-            params={"date": today}
-        )
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{APIFOOTBALL_BASE}/fixtures",
+                headers=APIFOOTBALL_HEADERS,
+                params={"date": today}
+            )
 
-    data = response.json()
+        data = response.json()
 
-    fixtures = []
+        fixtures = []
 
-    for fixture in data.get("response", []):
-        fixtures.append({
-            "id": fixture["fixture"]["id"],
-            "time": fixture["fixture"]["date"],
-            "status": fixture["fixture"]["status"]["short"],
-            "status_long": fixture["fixture"]["status"]["long"],
-            "minute": fixture["fixture"]["status"]["elapsed"],
-            "home_team": fixture["teams"]["home"]["name"],
-            "home_logo": fixture["teams"]["home"]["logo"],
-            "away_team": fixture["teams"]["away"]["name"],
-            "away_logo": fixture["teams"]["away"]["logo"],
-            "home_score": fixture["goals"]["home"],
-            "away_score": fixture["goals"]["away"],
-            "league": fixture["league"]["name"],
-            "league_logo": fixture["league"]["logo"],
-            "country": fixture["league"]["country"],
-        })
+        for fixture in data.get("response", []):
+            fixtures.append({
+                "id": fixture["fixture"]["id"],
+                "time": fixture["fixture"]["date"],
+                "status": fixture["fixture"]["status"]["short"],
+                "minute": fixture["fixture"]["status"].get("elapsed", 0),
+                "home_team": fixture["teams"]["home"]["name"],
+                "home_logo": fixture["teams"]["home"]["logo"],
+                "away_team": fixture["teams"]["away"]["name"],
+                "away_logo": fixture["teams"]["away"]["logo"],
+                "home_score": fixture["goals"]["home"],
+                "away_score": fixture["goals"]["away"],
+                "league": fixture["league"]["name"],
+                "league_logo": fixture["league"]["logo"],
+                "country": fixture["league"]["country"],
+            })
 
-    return {"fixtures": fixtures}
+        return {"fixtures": fixtures}
+
+    except Exception as e:
+        return {"fixtures": [], "error": str(e)}
 
 
+# ---------------- STANDINGS ----------------
 @app.get("/standings/{competition_code}")
 async def get_standings(competition_code: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{FOOTBALLDATA_BASE}/competitions/{competition_code}/standings",
-            headers=FOOTBALLDATA_HEADERS,
-        )
-
-    data = response.json()
-
     try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{FOOTBALLDATA_BASE}/competitions/{competition_code}/standings",
+                headers=FOOTBALLDATA_HEADERS,
+            )
+
+        data = response.json()
+
+        if "standings" not in data:
+            return {"standings": [], "error": "No standings data"}
+
         standings_data = data["standings"][0]["table"]
 
         result = []
@@ -145,27 +166,24 @@ async def get_standings(competition_code: str):
                 "form": team.get("form", ""),
             })
 
-        return {
-            "standings": result,
-            "competition": data["competition"]["name"],
-            "season": data["season"]["startDate"][:4],
-        }
+        return {"standings": result}
 
     except Exception as e:
         return {"standings": [], "error": str(e)}
 
 
+# ---------------- SCORERS ----------------
 @app.get("/scorers/{competition_code}")
 async def get_top_scorers(competition_code: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{FOOTBALLDATA_BASE}/competitions/{competition_code}/scorers",
-            headers=FOOTBALLDATA_HEADERS,
-        )
-
-    data = response.json()
-
     try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{FOOTBALLDATA_BASE}/competitions/{competition_code}/scorers",
+                headers=FOOTBALLDATA_HEADERS,
+            )
+
+        data = response.json()
+
         scorers = []
 
         for scorer in data.get("scorers", []):
@@ -176,7 +194,6 @@ async def get_top_scorers(competition_code: str):
                 "team_logo": scorer["team"]["crest"],
                 "goals": scorer.get("goals", 0),
                 "assists": scorer.get("assists", 0),
-                "penalties": scorer.get("penalties", 0),
             })
 
         return {"scorers": scorers}
@@ -185,18 +202,18 @@ async def get_top_scorers(competition_code: str):
         return {"scorers": [], "error": str(e)}
 
 
+# ---------------- TEAM SEARCH ----------------
 @app.get("/team/{team_name}")
 async def search_team(team_name: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{SPORTSDB_BASE}/searchteams.php",
-            params={"t": team_name}
-        )
-
-    data = response.json()
-
     try:
-        teams = data.get("teams", []) or []
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{SPORTSDB_BASE}/searchteams.php",
+                params={"t": team_name}
+            )
+
+        data = response.json()
+        teams = data.get("teams") or []
 
         result = []
 
@@ -209,9 +226,7 @@ async def search_team(team_name: str):
                 "league": team.get("strLeague"),
                 "founded": team.get("intFormedYear"),
                 "stadium": team.get("strStadium"),
-                "stadium_image": team.get("strStadiumThumb"),
-                "description": team.get("strDescriptionEN", "")[:300] if team.get("strDescriptionEN") else "",
-                "website": team.get("strWebsite"),
+                "description": (team.get("strDescriptionEN") or "")[:300],
             })
 
         return {"teams": result}
@@ -220,18 +235,18 @@ async def search_team(team_name: str):
         return {"teams": [], "error": str(e)}
 
 
+# ---------------- PLAYER SEARCH ----------------
 @app.get("/player/{player_name}")
 async def search_player(player_name: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{SPORTSDB_BASE}/searchplayers.php",
-            params={"p": player_name}
-        )
-
-    data = response.json()
-
     try:
-        players = data.get("player", []) or []
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.get(
+                f"{SPORTSDB_BASE}/searchplayers.php",
+                params={"p": player_name}
+            )
+
+        data = response.json()
+        players = data.get("player") or []
 
         result = []
 
@@ -245,8 +260,7 @@ async def search_player(player_name: str):
                 "date_of_birth": player.get("dateBorn"),
                 "height": player.get("strHeight"),
                 "weight": player.get("strWeight"),
-                "description": player.get("strDescriptionEN", "")[:300] if player.get("strDescriptionEN") else "",
-                "instagram": player.get("strInstagram"),
+                "description": (player.get("strDescriptionEN") or "")[:300],
             })
 
         return {"players": result}
@@ -255,50 +269,7 @@ async def search_player(player_name: str):
         return {"players": [], "error": str(e)}
 
 
-@app.get("/transfers/{team_name}")
-async def get_transfers(team_name: str):
-    async with httpx.AsyncClient() as client:
-        team_response = await client.get(
-            f"{SPORTSDB_BASE}/searchteams.php",
-            params={"t": team_name}
-        )
-
-    team_data = team_response.json()
-
-    try:
-        team = team_data["teams"][0]
-        team_id = team["idTeam"]
-
-        async with httpx.AsyncClient() as client:
-            transfers_response = await client.get(
-                f"{SPORTSDB_BASE}/lookup_transfers.php",
-                params={"id": team_id}
-            )
-
-        transfers_data = transfers_response.json()
-        transfers = transfers_data.get("transfers", []) or []
-
-        result = []
-
-        for t in transfers[:10]:
-            result.append({
-                "player": t.get("strPlayer"),
-                "from_team": t.get("strFromTeam"),
-                "to_team": t.get("strToTeam"),
-                "season": t.get("strSeason"),
-                "transfer_type": t.get("strTransferType"),
-            })
-
-        return {
-            "transfers": result,
-            "team": team.get("strTeam"),
-            "logo": team.get("strTeamBadge")
-        }
-
-    except Exception as e:
-        return {"transfers": [], "error": str(e)}
-
-
+# ---------------- PREDICT ----------------
 @app.post("/predict")
 def predict_match(data: MatchRequest):
     try:
@@ -306,32 +277,17 @@ def predict_match(data: MatchRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a professional football analyst who gives exciting, concise match predictions."
+                    "content": "You are a football analyst."
                 },
                 {
                     "role": "user",
-                    "content": f"""
-Predict the football match between {data.team1} and {data.team2}.
-
-Include:
-- Likely winner with confidence percentage
-- Predicted score
-- Key players to watch
-- Tactical insight
-- Brief match analysis
-
-Keep it concise and exciting.
-"""
+                    "content": f"Predict {data.team1} vs {data.team2} with score, winner, and analysis."
                 }
             ],
             model="llama-3.3-70b-versatile",
         )
 
-        return {
-            "prediction": chat_completion.choices[0].message.content
-        }
+        return {"prediction": chat_completion.choices[0].message.content}
 
     except Exception as e:
-        return {
-            "prediction": f"Error generating prediction: {str(e)}"
-        }
+        return {"prediction": f"Error: {str(e)}"}
