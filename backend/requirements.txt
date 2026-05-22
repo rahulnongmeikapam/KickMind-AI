@@ -1,18 +1,9 @@
-<<<<<<< HEAD
 fastapi
 uvicorn
 requests
 python-dotenv
 groq
+pandas
 streamlit
-pydantic
-=======
-fastapi
-uvicorn
-requests
-python-dotenv
-groq
-streamlit
-pydantic
->>>>>>> 2db2efc900a8a3c291d1ab8c991548ce2aa8c53e
 httpx
+python-multipart
