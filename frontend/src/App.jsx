@@ -571,6 +571,18 @@ export default function App() {
         )}
 
       </div>
+
+      {/* FOOTER */}
+      <footer className="border-t border-gray-800 mt-16 py-8 text-center">
+        <p className="text-gray-500 text-sm">
+          Designed by{" "}
+          <span className="text-green-400 font-semibold">Rahul Nongmeikapam</span>
+        </p>
+        <p className="text-gray-700 text-xs mt-1">
+          KickMind AI · Real-Time Football Intelligence
+        </p>
+      </footer>
+
     </div>
   )
 }
