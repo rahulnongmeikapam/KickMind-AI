@@ -5,7 +5,7 @@ It combines AI + football + real-time API architecture into a clean and interact
 ---
 
 ## 🌐 Live App
-[[Launch KickMind]((https://kick-mind-ai.vercel.app/)]
+[Launch KickMind](https://kick-mind-ai.vercel.app/)
 ---
 
 ## 🚀 Overview
