@@ -25,7 +25,7 @@ It combines AI + football + real-time API architecture into a clean and interact
 ## Tech Stack
 
 - Frontend
-- 
+
 -React / Next.js
 
 -Tailwind CSS
