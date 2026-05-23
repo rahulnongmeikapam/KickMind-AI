@@ -31,6 +31,8 @@ It combines AI + football + real-time API architecture into a clean and interact
    Tailwind CSS,
   
    Hosted on Vercel
+
+
   
 - Backend:
 
