@@ -25,28 +25,17 @@ It combines AI + football + real-time API architecture into a clean and interact
 ## Tech Stack
 
 - Frontend
-
--React / Next.js
-
--Tailwind CSS
-
--Hosted on Vercel
-
--Backend
-
--FastAPI (Python)
-
--Uvicorn server
-
--Groq / LLM API integration
-
--Infrastructure
-
--REST API architecture
-
--CORS enabled backend
-
--Environment-based configuration (.env)
+- React / Next.js
+- Tailwind CSS
+- Hosted on Vercel
+- Backend
+- FastAPI (Python)
+- Uvicorn server
+- Groq / LLM API integration
+- Infrastructure
+- REST API architecture
+- CORS enabled backend
+- Environment-based configuration (.env)
 
 
 ---
@@ -101,15 +90,15 @@ npm run dev
 
 ## Future Improvements
 
--🔴Live match tracking integration
+- 🔴Live match tracking integration
 
--📊 Player statistics dashboard
+- 📊 Player statistics dashboard
 
--🤖 Advanced prediction engine
+- 🤖 Advanced prediction engine
 
--💬 Memory-based AI chat system
+- 💬 Memory-based AI chat system
 
--📱 Mobile application version
+- 📱 Mobile application version
 
 
 
@@ -125,11 +114,11 @@ Rahul Nongmeikapam👨‍💻
 
 If you like this project:
 
--⭐ Star the repository
+- ⭐ Star the repository
 
--🍴 Fork it
+- 🍴 Fork it
 
--🚀 Share it
+- 🚀 Share it
 
--🧠 Suggest improvements
+- 🧠 Suggest improvements
 
