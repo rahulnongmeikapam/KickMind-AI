@@ -72,9 +72,13 @@ npm run dev
 ## Usage
 
 1.User interacts with the frontend UI
+
 2.Request is sent to FastAPI backend
+
 3.Backend processes request using AI logic layer
+
 4.Response is generated and returned
+
 5.UI displays intelligent football insight
 
 
@@ -87,9 +91,13 @@ npm run dev
 ## Future Improvements
 
 -🔴Live match tracking integration
+
 -📊 Player statistics dashboard
+
 -🤖 Advanced prediction engine
+
 -💬 Memory-based AI chat system
+
 -📱 Mobile application version
 
 
