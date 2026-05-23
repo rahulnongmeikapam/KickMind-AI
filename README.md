@@ -25,18 +25,26 @@ It combines AI + football + real-time API architecture into a clean and interact
 ## Tech Stack
 
 - Frontend:
-  -React / Next.js,
-  -Tailwind CSS,
-  -Hosted on Vercel
+   React / Next.js,
   
-- Backend
-  -FastAPI (Python),
-  -Uvicorn server,
-  -Groq / LLM API integration,
-  -Infrastructure,
-  -REST API architecture,
-  -CORS enabled backend,
-  -Environment-based configuration (.env)
+   Tailwind CSS,
+  
+   Hosted on Vercel
+  
+- Backend:
+   FastAPI (Python),
+  
+   Uvicorn server,
+  
+   Groq / LLM API integration,
+  
+   Infrastructure,
+  
+   REST API architecture,
+  
+   CORS enabled backend,
+  
+   Environment-based configuration (.env)
 
 
 ---
